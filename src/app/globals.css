@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Twilight SmartBus Brand Colors */
+:root {
+  /* Brand Colors */
+  --twilight-blue-950: #0c1832;
+  --twilight-blue-900: #0f2554;
+  --twilight-blue-800: #1a3a7c;
+  --twilight-blue-700: #1e40af;
+  --twilight-blue-600: #2563eb;
+  --twilight-blue-500: #3b82f6;
+  --twilight-blue-400: #60a5fa;
+  --twilight-blue-100: #dbeafe;
+  --twilight-blue-50: #eff6ff;
+
+  --twilight-green-700: #4d7c0f;
+  --twilight-green-600: #65a30d;
+  --twilight-green-500: #84cc16;
+  --twilight-green-400: #a3e635;
+  --twilight-green-100: #ecfccb;
+  --twilight-green-50: #f7fee7;
+
+  /* Light Mode (Default) - Using GREEN accent */
+  --background: #ffffff;
+  --background-secondary: #f8fafc;
+  --background-card: #ffffff;
+  --background-hover: #f1f5f9;
+
+  --foreground: #0f172a;
+  --foreground-secondary: #475569;
+  --foreground-muted: #94a3b8;
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --accent: var(--twilight-green-600);
+  --accent-foreground: #ffffff;
+  --accent-hover: var(--twilight-green-700);
+
+  --success: #22c55e;
+  --success-bg: #dcfce7;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  --error: #ef4444;
+  --error-bg: #fee2e2;
+
+  --sidebar-bg: var(--twilight-blue-950);
+  --sidebar-text: #e2e8f0;
+  --sidebar-text-muted: #94a3b8;
+  --sidebar-active: rgba(255, 255, 255, 0.1);
+  --sidebar-accent: var(--twilight-green-500);
+}
+
+.dark {
+  --background: #0c1832;
+  --background-secondary: #0f172a;
+  --background-card: #1e293b;
+  --background-hover: #334155;
+
+  --foreground: #f8fafc;
+  --foreground-secondary: #94a3b8;
+  --foreground-muted: #64748b;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  --accent: var(--twilight-green-500);
+  --accent-foreground: var(--twilight-blue-950);
+  --accent-hover: var(--twilight-green-400);
+
+  --success-bg: rgba(34, 197, 94, 0.15);
+  --warning-bg: rgba(245, 158, 11, 0.15);
+  --error-bg: rgba(239, 68, 68, 0.15);
+
+  --sidebar-bg: #0a1628;
+}
+
+@layer base {
+  * {
+    @apply border-[var(--border)];
+  }
+
+  body {
+    @apply antialiased;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--foreground-muted);
+    border-radius: 4px;
+    opacity: 0.3;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    opacity: 0.5;
+  }
+
+  /* Focus */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--background-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
