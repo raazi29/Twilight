@@ -68,12 +68,12 @@ export function SettleButton({
                 {isSuccess ? (
                     <div className="flex flex-col items-center justify-center py-10">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20">
-                            <CheckCircle2 className="h-6 w-6 text-green-400" />
+                            <CheckCircle2 className="h-6 w-6 text-green-500" />
                         </div>
-                        <h3 className="mt-4 text-[15px] font-semibold text-white">
+                        <h3 className="mt-4 text-[15px] font-semibold">
                             Settlement Complete
                         </h3>
-                        <p className="mt-1 text-[13px] text-slate-400">
+                        <p className="mt-1 text-[13px] text-[var(--foreground-muted)]">
                             {formatCurrency(amount)} processed
                         </p>
                     </div>
@@ -87,20 +87,20 @@ export function SettleButton({
                         </DialogHeader>
 
                         <div className="p-5">
-                            <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-4">
+                            <div className="rounded-lg bg-[var(--background-hover)] border p-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[12px] text-slate-500">Amount</span>
-                                    <span className="text-[20px] font-semibold text-white tabular-nums">
+                                    <span className="text-[12px] text-[var(--foreground-muted)]">Amount</span>
+                                    <span className="text-[20px] font-semibold tabular-nums">
                                         {formatCurrency(amount)}
                                     </span>
                                 </div>
                                 <div className="mt-3 flex items-center justify-between text-[12px]">
-                                    <span className="text-slate-500">Type</span>
-                                    <span className="text-slate-300">{typeLabel}</span>
+                                    <span className="text-[var(--foreground-muted)]">Type</span>
+                                    <span>{typeLabel}</span>
                                 </div>
                                 <div className="mt-2 flex items-center justify-between text-[12px]">
-                                    <span className="text-slate-500">Period</span>
-                                    <span className="text-slate-300">{periodLabel}</span>
+                                    <span className="text-[var(--foreground-muted)]">Period</span>
+                                    <span>{periodLabel}</span>
                                 </div>
                             </div>
 
