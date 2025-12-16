@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme-provider";
+import { useState } from "react";
 import {
     LayoutDashboard,
     Route,
@@ -14,6 +15,7 @@ import {
     Settings,
     Moon,
     Sun,
+    Bus,
 } from "lucide-react";
 
 const navItems = [
@@ -27,20 +29,32 @@ const navItems = [
 export function Sidebar() {
     const pathname = usePathname();
     const { theme, setTheme, resolvedTheme } = useTheme();
+    const [imageError, setImageError] = useState(false);
 
     return (
         <aside className="fixed left-0 top-0 z-40 h-screen w-[220px] border-r bg-[var(--sidebar-bg)] text-[var(--sidebar-text)]">
             {/* Logo */}
-            <div className="flex h-14 items-center px-5 border-b border-white/10">
-                <Link href="/" className="flex items-center gap-2">
-                    <Image
-                        src="/logo.png"
-                        alt="Twilight"
-                        width={28}
-                        height={28}
-                        className="rounded-md"
-                    />
-                    <span className="text-[15px] font-semibold text-white">Twilight</span>
+            <div className="flex h-16 items-center px-4 border-b border-white/10">
+                <Link href="/" className="flex items-center gap-3">
+                    {!imageError ? (
+                        <Image
+                            src="/logo.png"
+                            alt="Twilight"
+                            width={36}
+                            height={36}
+                            className="rounded-lg"
+                            onError={() => setImageError(true)}
+                            priority
+                        />
+                    ) : (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-twilight-green-500 to-twilight-blue-600">
+                            <Bus className="h-5 w-5 text-white" />
+                        </div>
+                    )}
+                    <div className="flex flex-col">
+                        <span className="text-[15px] font-bold text-white tracking-tight">Twilight</span>
+                        <span className="text-[10px] text-white/60 font-medium">SmartBus</span>
+                    </div>
                 </Link>
             </div>
 
@@ -55,7 +69,7 @@ export function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "group flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-all duration-150",
+                                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-150",
                                 isActive
                                     ? "bg-[var(--sidebar-active)] text-white"
                                     : "text-[var(--sidebar-text-muted)] hover:bg-white/5 hover:text-white"
@@ -83,7 +97,7 @@ export function Sidebar() {
                 {/* Theme Toggle */}
                 <button
                     onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--sidebar-text-muted)] transition-colors hover:bg-white/5 hover:text-white"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-[var(--sidebar-text-muted)] transition-colors hover:bg-white/5 hover:text-white"
                 >
                     {resolvedTheme === "dark" ? (
                         <Sun className="h-4 w-4" />
@@ -95,7 +109,12 @@ export function Sidebar() {
 
                 <Link
                     href="/settings"
-                    className="flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--sidebar-text-muted)] transition-colors hover:bg-white/5 hover:text-white"
+                    className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors",
+                        pathname === "/settings"
+                            ? "bg-[var(--sidebar-active)] text-white"
+                            : "text-[var(--sidebar-text-muted)] hover:bg-white/5 hover:text-white"
+                    )}
                 >
                     <Settings className="h-4 w-4" />
                     Settings
