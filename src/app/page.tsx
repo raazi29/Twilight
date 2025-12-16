@@ -1,37 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DashboardShell, Header } from "@/components/layout";
-import { EarningsCard, EarningsToggle } from "@/components/earnings";
+import { EarningsCard, EarningsToggle, SettleButton } from "@/components/earnings";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { Users, Route, Truck, ArrowRight, Banknote } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { Users, Route, Truck, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-// Demo data
-const DEMO_EARNINGS = {
-    batta: 85000,
-    salary: 245000,
-    tripCount: 142,
-};
-
-const DEMO_STATS = {
-    drivers: 4,
-    routes: 4,
-    trips: 28,
-};
-
-const DEMO_TRIPS = [
-    { id: "1", driver: "Rajesh Kumar", route: "Hyderabad → Tirupati", batta: 1000, salary: 600 },
-    { id: "2", driver: "Suresh Reddy", route: "Chennai → Bangalore", batta: 1300, salary: 0 },
-    { id: "3", driver: "Venkat Rao", route: "Hyderabad → Mumbai", batta: 0, salary: 2500 },
-    { id: "4", driver: "Krishna Murthy", route: "Vizag → Hyderabad", batta: 600, salary: 400 },
-];
+interface EarningsData {
+    total_batta: number;
+    total_salary: number;
+    unsettled_batta: number;
+    unsettled_salary: number;
+    trip_count: number;
+    period_start: string;
+    period_end: string;
+}
 
 export default function DashboardPage() {
     const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
+    const [earnings, setEarnings] = useState<EarningsData | null>(null);
+    const [stats, setStats] = useState({ drivers: 0, routes: 0, trips: 0 });
+    const [recentTrips, setRecentTrips] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const [earningsRes, driversRes, routesRes, tripsRes] = await Promise.all([
+                fetch(`/api/earnings?period=${period}`),
+                fetch("/api/drivers"),
+                fetch("/api/routes"),
+                fetch("/api/trips"),
+            ]);
+
+            const earningsData = await earningsRes.json();
+            const driversData = await driversRes.json();
+            const routesData = await routesRes.json();
+            const tripsData = await tripsRes.json();
+
+            if (earningsData.data) setEarnings(earningsData.data);
+            setStats({
+                drivers: driversData.data?.length || 0,
+                routes: routesData.data?.length || 0,
+                trips: tripsData.data?.length || 0,
+            });
+            setRecentTrips((tripsData.data || []).slice(0, 5));
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [period]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const handleSettle = async () => {
+        // Refetch data after settlement
+        await fetchData();
+    };
+
+    const periodLabel = period === "weekly"
+        ? `${earnings?.period_start || ''} - ${earnings?.period_end || ''}`
+        : "This month";
 
     return (
         <DashboardShell>
@@ -42,35 +77,44 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between">
                     <EarningsToggle value={period} onChange={setPeriod} />
 
-                    <Button size="sm" className="gap-1.5">
-                        <Banknote className="h-3.5 w-3.5" />
-                        Settle {period === "weekly" ? "Batta" : "Salary"}
-                    </Button>
+                    {earnings && (
+                        <SettleButton
+                            type={period === "weekly" ? "batta" : "salary"}
+                            amount={period === "weekly" ? earnings.unsettled_batta : earnings.unsettled_salary}
+                            periodLabel={periodLabel}
+                            onSettle={handleSettle}
+                            disabled={loading}
+                        />
+                    )}
                 </div>
 
                 {/* Earnings Summary */}
-                <div className="grid gap-4 md:grid-cols-3">
-                    <EarningsCard
-                        title="Batta Payable"
-                        amount={DEMO_EARNINGS.batta}
-                        periodLabel={period === "weekly" ? "This week" : "This month"}
-                        variant="batta"
-                        trend={{ value: 12, direction: "up" }}
-                    />
-                    <EarningsCard
-                        title="Salary Payable"
-                        amount={DEMO_EARNINGS.salary}
-                        periodLabel={period === "weekly" ? "This week" : "This month"}
-                        variant="salary"
-                        trend={{ value: 8, direction: "up" }}
-                    />
-                    <EarningsCard
-                        title="Total Payable"
-                        amount={DEMO_EARNINGS.batta + DEMO_EARNINGS.salary}
-                        periodLabel={`${DEMO_EARNINGS.tripCount} trips`}
-                        variant="total"
-                    />
-                </div>
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-6 w-6 animate-spin text-[var(--foreground-muted)]" />
+                    </div>
+                ) : (
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <EarningsCard
+                            title="Batta Payable"
+                            amount={earnings?.unsettled_batta || 0}
+                            periodLabel={period === "weekly" ? "This week" : "This month"}
+                            variant="batta"
+                        />
+                        <EarningsCard
+                            title="Salary Payable"
+                            amount={earnings?.unsettled_salary || 0}
+                            periodLabel={period === "weekly" ? "This week" : "This month"}
+                            variant="salary"
+                        />
+                        <EarningsCard
+                            title="Total Payable"
+                            amount={(earnings?.unsettled_batta || 0) + (earnings?.unsettled_salary || 0)}
+                            periodLabel={`${earnings?.trip_count || 0} trips`}
+                            variant="total"
+                        />
+                    </div>
+                )}
 
                 {/* Quick Stats */}
                 <div className="grid gap-3 md:grid-cols-3">
@@ -83,7 +127,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                         <p className="text-[22px] font-semibold text-[var(--foreground)] tabular-nums">
-                                            {DEMO_STATS.drivers}
+                                            {stats.drivers}
                                         </p>
                                         <p className="text-[11px] text-[var(--foreground-muted)]">Active Drivers</p>
                                     </div>
@@ -102,7 +146,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                         <p className="text-[22px] font-semibold text-[var(--foreground)] tabular-nums">
-                                            {DEMO_STATS.routes}
+                                            {stats.routes}
                                         </p>
                                         <p className="text-[11px] text-[var(--foreground-muted)]">Routes</p>
                                     </div>
@@ -121,9 +165,9 @@ export default function DashboardPage() {
                                     </div>
                                     <div>
                                         <p className="text-[22px] font-semibold text-[var(--foreground)] tabular-nums">
-                                            {DEMO_STATS.trips}
+                                            {stats.trips}
                                         </p>
-                                        <p className="text-[11px] text-[var(--foreground-muted)]">Trips Today</p>
+                                        <p className="text-[11px] text-[var(--foreground-muted)]">Total Trips</p>
                                     </div>
                                 </div>
                                 <ArrowRight className="h-4 w-4 text-[var(--foreground-muted)] group-hover:text-[var(--foreground)] transition-colors" />
@@ -132,7 +176,7 @@ export default function DashboardPage() {
                     </Link>
                 </div>
 
-                {/* Recent Activity */}
+                {/* Recent Trips */}
                 <div>
                     <div className="flex items-center justify-between mb-3">
                         <h2 className="text-[13px] font-medium text-[var(--foreground-secondary)]">Recent Trips</h2>
@@ -143,25 +187,37 @@ export default function DashboardPage() {
 
                     <Card>
                         <div className="divide-y divide-[var(--border)]">
-                            {DEMO_TRIPS.map((trip) => (
-                                <div key={trip.id} className="flex items-center justify-between px-4 py-3">
-                                    <div className="flex flex-col">
-                                        <span className="text-[13px] text-[var(--foreground)]">{trip.driver}</span>
-                                        <span className="text-[11px] text-[var(--foreground-muted)]">{trip.route}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-right">
-                                            <span className="text-[13px] font-medium text-[var(--foreground)] tabular-nums">
-                                                {formatCurrency(trip.batta + trip.salary)}
+                            {recentTrips.length === 0 ? (
+                                <div className="px-4 py-8 text-center">
+                                    <p className="text-[13px] text-[var(--foreground-muted)]">
+                                        No trips recorded yet. <Link href="/trips" className="text-[var(--accent)] hover:underline">Add your first trip</Link>
+                                    </p>
+                                </div>
+                            ) : (
+                                recentTrips.map((trip) => (
+                                    <div key={trip.id} className="flex items-center justify-between px-4 py-3">
+                                        <div className="flex flex-col">
+                                            <span className="text-[13px] text-[var(--foreground)]">
+                                                {trip.driver?.name || "Unknown Driver"}
                                             </span>
-                                            <div className="flex items-center gap-2 justify-end mt-0.5">
-                                                {trip.batta > 0 && <Badge variant="warning">B: {formatCurrency(trip.batta)}</Badge>}
-                                                {trip.salary > 0 && <Badge variant="info">S: {formatCurrency(trip.salary)}</Badge>}
+                                            <span className="text-[11px] text-[var(--foreground-muted)]">
+                                                {trip.route?.name || "Unknown Route"}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="text-right">
+                                                <span className="text-[13px] font-medium text-[var(--foreground)] tabular-nums">
+                                                    {formatCurrency((trip.batta_earned || 0) + (trip.salary_earned || 0))}
+                                                </span>
+                                                <div className="flex items-center gap-2 justify-end mt-0.5">
+                                                    {trip.batta_earned > 0 && <Badge variant="warning">B: {formatCurrency(trip.batta_earned)}</Badge>}
+                                                    {trip.salary_earned > 0 && <Badge variant="info">S: {formatCurrency(trip.salary_earned)}</Badge>}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </Card>
                 </div>
