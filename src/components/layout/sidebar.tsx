@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme-provider";
@@ -31,12 +32,16 @@ export function Sidebar() {
         <aside className="fixed left-0 top-0 z-40 h-screen w-[220px] border-r bg-[var(--sidebar-bg)] text-[var(--sidebar-text)]">
             {/* Logo */}
             <div className="flex h-14 items-center px-5 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-twilight-blue-600 to-twilight-green-500">
-                        <Truck className="h-4 w-4 text-white" />
-                    </div>
+                <Link href="/" className="flex items-center gap-2">
+                    <Image
+                        src="/logo.png"
+                        alt="Twilight"
+                        width={28}
+                        height={28}
+                        className="rounded-md"
+                    />
                     <span className="text-[15px] font-semibold text-white">Twilight</span>
-                </div>
+                </Link>
             </div>
 
             {/* Navigation */}
