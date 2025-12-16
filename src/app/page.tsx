@@ -74,8 +74,13 @@ export default function DashboardPage() {
 
             <div className="p-6 space-y-6 animate-fade-in">
                 {/* Top Bar */}
-                <div className="flex items-center justify-between">
-                    <EarningsToggle value={period} onChange={setPeriod} />
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-4">
+                        <EarningsToggle value={period} onChange={setPeriod} />
+                        <span className="text-[12px] text-[var(--foreground-muted)] hidden sm:block">
+                            {period === "weekly" ? "Batta is settled weekly" : "Salary is settled monthly"}
+                        </span>
+                    </div>
 
                     {earnings && (
                         <SettleButton
@@ -90,27 +95,33 @@ export default function DashboardPage() {
 
                 {/* Earnings Summary */}
                 {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-6 w-6 animate-spin text-[var(--foreground-muted)]" />
+                    <div className="grid gap-4 md:grid-cols-3">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="rounded-xl border bg-[var(--background-card)] p-5 animate-pulse">
+                                <div className="h-3 w-24 bg-[var(--background-hover)] rounded mb-4" />
+                                <div className="h-8 w-32 bg-[var(--background-hover)] rounded mb-2" />
+                                <div className="h-3 w-16 bg-[var(--background-hover)] rounded" />
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-3">
                         <EarningsCard
-                            title="Batta Payable"
+                            title={period === "weekly" ? "Batta (This Week)" : "Batta (This Month)"}
                             amount={earnings?.unsettled_batta || 0}
-                            periodLabel={period === "weekly" ? "This week" : "This month"}
+                            periodLabel={period === "weekly" ? "Weekly settlement" : "Monthly total"}
                             variant="batta"
                         />
                         <EarningsCard
-                            title="Salary Payable"
+                            title={period === "weekly" ? "Salary (This Week)" : "Salary (This Month)"}
                             amount={earnings?.unsettled_salary || 0}
-                            periodLabel={period === "weekly" ? "This week" : "This month"}
+                            periodLabel={period === "monthly" ? "Monthly settlement" : "Weekly total"}
                             variant="salary"
                         />
                         <EarningsCard
                             title="Total Payable"
                             amount={(earnings?.unsettled_batta || 0) + (earnings?.unsettled_salary || 0)}
-                            periodLabel={`${earnings?.trip_count || 0} trips`}
+                            periodLabel={`${earnings?.trip_count || 0} trips recorded`}
                             variant="total"
                         />
                     </div>
