@@ -24,6 +24,7 @@ CREATE TABLE drivers (
   name TEXT NOT NULL,
   phone TEXT,
   vehicle_number TEXT,
+  profile_image TEXT,
   payment_preference TEXT NOT NULL DEFAULT 'batta_only' 
     CHECK (payment_preference IN ('batta_only', 'salary_only', 'split')),
   created_at TIMESTAMPTZ DEFAULT NOW(),

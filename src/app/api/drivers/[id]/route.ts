@@ -39,7 +39,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const supabase = createServerClient();
         const body = await request.json();
 
-        const { name, phone, vehicle_number, payment_preference } = body;
+        const { name, phone, vehicle_number, payment_preference, profile_image } = body;
 
         if (payment_preference && !['batta_only', 'salary_only', 'split'].includes(payment_preference)) {
             return NextResponse.json(
@@ -55,6 +55,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
                 phone,
                 vehicle_number,
                 payment_preference,
+                profile_image,
             })
             .eq('id', params.id)
             .select()

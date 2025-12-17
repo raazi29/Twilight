@@ -343,19 +343,19 @@ function SettlementsContent() {
 
                     <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                         <DialogTrigger asChild>
-                            <Button className="w-full sm:w-auto gap-1.5 bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 shadow-md shadow-lime-500/20 text-white">
+                            <Button className="w-full sm:w-auto gap-1.5 bg-emerald-600 hover:bg-emerald-700 shadow-md text-white">
                                 <Plus className="h-4 w-4" />
                                 New Settlement
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[625px]">
+                        <DialogContent className="sm:max-w-[640px]">
                             <DialogHeader>
                                 <DialogTitle className="text-xl">Create Settlement</DialogTitle>
                                 <DialogDescription className="text-[14px]">
                                     Calculate and record payment for drivers based on their trips.
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-6 py-6" id="create-settlement-form">
+                            <div className="grid gap-5 pt-4" id="create-settlement-form">
                                 <div className="grid gap-2">
                                     <Label htmlFor="driver" className="text-sm font-medium">Driver</Label>
                                     <Select
@@ -451,7 +451,7 @@ function SettlementsContent() {
                                         handleCreateSettlement();
                                     }}
                                     disabled={createLoading}
-                                    className="h-11 px-8 bg-[var(--accent)] hover:opacity-90 text-[var(--accent-foreground)] shadow-md"
+                                    className="h-11 px-8 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-foreground)] shadow-md"
                                 >
                                     {createLoading ? "Calculating..." : "Calculate & Create"}
                                 </Button>

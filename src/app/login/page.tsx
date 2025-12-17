@@ -17,7 +17,7 @@ function SubmitButton() {
     return (
         <Button
             type="submit"
-            className="w-full h-12 text-[15px] font-semibold bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 shadow-lg shadow-lime-500/30 transition-all duration-200 text-white"
+            className="w-full h-12 text-[15px] font-semibold bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all duration-200 text-white"
             disabled={pending}
         >
             {pending ? (
@@ -72,7 +72,7 @@ export default function LoginPage() {
                 <div className="absolute bottom-8 left-8 right-8 z-10">
                     <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">
                         Driver Payment<br />
-                        <span className="text-lime-400">Management System</span>
+                        <span className="text-emerald-400">Management System</span>
                     </h1>
                     <p className="text-slate-200 text-lg max-w-md">
                         Streamline driver settlements and track earnings in real-time.
@@ -124,7 +124,7 @@ export default function LoginPage() {
                                         placeholder="admin@twilightbus.com"
                                         required
                                         autoComplete="email"
-                                        className="h-12 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-lime-500/20 focus:border-lime-500 transition-all rounded-xl"
+                                        className="h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all rounded-xl backdrop-blur-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -136,7 +136,7 @@ export default function LoginPage() {
                                         placeholder="••••••••"
                                         required
                                         autoComplete="current-password"
-                                        className="h-12 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-lime-500/20 focus:border-lime-500 transition-all rounded-xl"
+                                        className="h-12 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all rounded-xl backdrop-blur-sm"
                                     />
                                 </div>
                                 {error && (
@@ -156,7 +156,7 @@ export default function LoginPage() {
                             <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-700 to-transparent" />
                             <p className="text-xs text-center text-slate-400 flex items-center justify-center gap-2">
                                 <Lock className="h-3 w-3" />
-                                Secured by Supabase Auth
+                                Secure Login
                             </p>
                         </CardFooter>
                     </Card>

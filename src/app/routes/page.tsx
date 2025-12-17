@@ -193,72 +193,81 @@ export default function RoutesPage() {
         }
     };
 
-    // Shared form component with improved spacing
-    const RouteForm = () => (
-        <div className="grid gap-6 py-4">
+    // Form content as a variable (not a component) to prevent re-creation on state changes
+    const routeFormContent = (
+        <div className="grid gap-5 pt-4">
             <div className="grid gap-2">
-                <Label className="text-sm font-medium">Route Name <span className="text-slate-400 font-normal">(Auto-generated if empty)</span></Label>
+                <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Route Name <span className="text-slate-400 font-normal">(Auto-generated if empty)</span></Label>
                 <Input
                     placeholder="e.g., Hyderabad - Tirupati Express"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="h-10"
+                    className="h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
                 />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label className="text-sm font-medium">Origin <span className="text-red-500">*</span></Label>
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Origin <span className="text-red-500">*</span></Label>
                     <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                        <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                         <Input
                             placeholder="City"
                             value={formData.origin}
                             onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
-                            className="pl-9 h-10"
+                            className="pl-9 h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
                         />
                     </div>
                 </div>
                 <div className="grid gap-2">
-                    <Label className="text-sm font-medium">Destination <span className="text-red-500">*</span></Label>
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Destination <span className="text-red-500">*</span></Label>
                     <div className="relative">
-                        <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                        <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                         <Input
                             placeholder="City"
                             value={formData.destination}
                             onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                            className="pl-9 h-10"
+                            className="pl-9 h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
                         />
                     </div>
                 </div>
             </div>
 
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
-                <Label className="text-sm font-medium mb-3 block">Earnings Configuration per Trip</Label>
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-xl border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="h-8 w-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)]">
+                        <IndianRupee className="h-4 w-4" />
+                    </div>
+                    <div>
+                        <Label className="text-sm font-semibold text-slate-900 dark:text-white block">Earnings Configuration</Label>
+                        <p className="text-xs text-slate-500">Set base amounts per trip</p>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                        <Label className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Batta Amount</Label>
+                        <Label className="text-xs text-slate-500 uppercase tracking-wider font-bold">Batta Amount</Label>
                         <div className="relative">
-                            <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                            <span className="absolute left-3 top-3.5 text-slate-400 font-semibold text-sm">₹</span>
                             <Input
                                 type="number"
                                 placeholder="0"
                                 value={formData.batta_per_trip}
                                 onChange={(e) => setFormData({ ...formData, batta_per_trip: e.target.value })}
-                                className="pl-9 h-10 bg-white dark:bg-slate-900"
+                                className="pl-8 h-11 bg-white dark:bg-slate-900 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)] font-medium"
                             />
                         </div>
                     </div>
                     <div className="grid gap-2">
-                        <Label className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Salary Amount</Label>
+                        <Label className="text-xs text-slate-500 uppercase tracking-wider font-bold">Salary Amount</Label>
                         <div className="relative">
-                            <IndianRupee className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                            <span className="absolute left-3 top-3.5 text-slate-400 font-semibold text-sm">₹</span>
                             <Input
                                 type="number"
                                 placeholder="0"
                                 value={formData.salary_per_trip}
                                 onChange={(e) => setFormData({ ...formData, salary_per_trip: e.target.value })}
-                                className="pl-9 h-10 bg-white dark:bg-slate-900"
+                                className="pl-8 h-11 bg-white dark:bg-slate-900 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)] font-medium"
                             />
                         </div>
                     </div>
@@ -274,7 +283,7 @@ export default function RoutesPage() {
             <div className="p-6 space-y-6 animate-fade-in pb-24 md:pb-6">
                 {/* Actions */}
                 <div className="flex justify-end">
-                    <Button onClick={() => { setFormData(emptyRoute); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                    <Button onClick={() => { setFormData(emptyRoute); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white">
                         <Plus className="h-4 w-4" />
                         Add Route
                     </Button>
@@ -392,15 +401,15 @@ export default function RoutesPage() {
 
             {/* Add Dialog */}
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
                         <DialogTitle>Add New Route</DialogTitle>
                         <DialogDescription>Configure batta and salary per trip for this route.</DialogDescription>
                     </DialogHeader>
-                    <RouteForm />
+                    {routeFormContent}
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleAddRoute} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                        <Button onClick={handleAddRoute} disabled={submitting} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-md">
                             {submitting ? "Adding..." : "Add Route"}
                         </Button>
                     </DialogFooter>
@@ -409,15 +418,15 @@ export default function RoutesPage() {
 
             {/* Edit Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
                         <DialogTitle>Edit Route</DialogTitle>
                         <DialogDescription>Update route details and earnings configuration.</DialogDescription>
                     </DialogHeader>
-                    <RouteForm />
+                    {routeFormContent}
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleEditRoute} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                        <Button onClick={handleEditRoute} disabled={submitting} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-md">
                             {submitting ? "Saving..." : "Save Changes"}
                         </Button>
                     </DialogFooter>

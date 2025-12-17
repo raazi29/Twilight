@@ -202,7 +202,7 @@ export default function DashboardPage() {
 
                     <Dialog open={isSettleOpen} onOpenChange={setIsSettleOpen}>
                         <DialogTrigger asChild>
-                            <Button size="sm" className="gap-1.5 w-full sm:w-auto bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 shadow-md shadow-lime-500/20 text-white">
+                            <Button size="sm" className="gap-1.5 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 shadow-md text-white">
                                 <Banknote className="h-3.5 w-3.5" />
                                 Settle {period === "weekly" ? "Batta" : "Salary"}
                             </Button>
@@ -307,7 +307,7 @@ export default function DashboardPage() {
                                 <Button
                                     onClick={handleCreateSettlement}
                                     disabled={settleLoading}
-                                    className="h-10 px-6 bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white shadow-md"
+                                    className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
                                 >
                                     {settleLoading ? "Creating..." : "Create Settlement"}
                                 </Button>
@@ -438,20 +438,20 @@ export default function DashboardPage() {
                                     <div className="space-y-3">
                                         {stats.recentTrips.map((trip: any) => (
                                             <div key={trip.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-8 w-8 rounded-full bg-twilight-blue-100 dark:bg-twilight-blue-900/30 flex items-center justify-center">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="h-8 w-8 rounded-full bg-twilight-blue-100 dark:bg-twilight-blue-900/30 flex items-center justify-center shrink-0">
                                                         <Truck className="h-4 w-4 text-twilight-blue-600" />
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[13px] font-medium text-slate-900 dark:text-slate-100">
+                                                    <div className="min-w-0">
+                                                        <p className="text-[13px] font-medium text-slate-900 dark:text-slate-100 truncate">
                                                             {trip.driver?.name || "Unknown Driver"}
                                                         </p>
-                                                        <p className="text-[11px] text-slate-500">
+                                                        <p className="text-[11px] text-slate-500 truncate">
                                                             {trip.route?.name || "Unknown Route"} • {trip.trip_date}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
+                                                <div className="text-right shrink-0 ml-3">
                                                     <p className="text-[13px] font-bold text-green-600 dark:text-green-400 tabular-nums">
                                                         {formatCurrency((trip.batta_earned || 0) + (trip.salary_earned || 0))}
                                                     </p>

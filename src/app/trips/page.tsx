@@ -187,22 +187,22 @@ export default function TripsPage() {
 
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="w-full sm:w-auto gap-2 shadow-sm bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                            <Button className="w-full sm:w-auto gap-2 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white">
                                 <Plus className="h-4 w-4" />
                                 Record Trip
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[500px]">
+                        <DialogContent className="sm:max-w-[600px]">
                             <DialogHeader>
                                 <DialogTitle>Record New Trip</DialogTitle>
                                 <DialogDescription>Enter trip details to calculate earnings automatically.</DialogDescription>
                             </DialogHeader>
 
-                            <div className="grid gap-6 py-4">
+                            <div className="grid gap-5 pt-4">
                                 <div className="grid gap-2">
-                                    <Label className="text-sm font-medium">Select Driver <span className="text-red-500">*</span></Label>
+                                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Select Driver <span className="text-red-500">*</span></Label>
                                     <Select value={newTrip.driver_id} onValueChange={(v) => setNewTrip({ ...newTrip, driver_id: v })}>
-                                        <SelectTrigger className="h-10">
+                                        <SelectTrigger className="h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:ring-[var(--accent)]">
                                             <SelectValue placeholder="Search or select driver..." />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -214,9 +214,9 @@ export default function TripsPage() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label className="text-sm font-medium">Select Route <span className="text-red-500">*</span></Label>
+                                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Select Route <span className="text-red-500">*</span></Label>
                                     <Select value={newTrip.route_id} onValueChange={(v) => setNewTrip({ ...newTrip, route_id: v })}>
-                                        <SelectTrigger className="h-10">
+                                        <SelectTrigger className="h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:ring-[var(--accent)]">
                                             <SelectValue placeholder="Select route..." />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -229,40 +229,43 @@ export default function TripsPage() {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="grid gap-2">
-                                        <Label className="text-sm font-medium">Trip Date</Label>
-                                        <Input
-                                            type="date"
-                                            value={newTrip.trip_date}
-                                            onChange={(e) => setNewTrip({ ...newTrip, trip_date: e.target.value })}
-                                            className="h-10"
-                                        />
+                                        <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Trip Date</Label>
+                                        <div className="relative">
+                                            <Calendar className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+                                            <Input
+                                                type="date"
+                                                value={newTrip.trip_date}
+                                                onChange={(e) => setNewTrip({ ...newTrip, trip_date: e.target.value })}
+                                                className="pl-9 h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label className="text-sm font-medium">Number of Trips</Label>
+                                        <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Number of Trips</Label>
                                         <Input
                                             type="number"
                                             min="1"
                                             value={newTrip.trip_count}
                                             onChange={(e) => setNewTrip({ ...newTrip, trip_count: e.target.value })}
-                                            className="h-10"
+                                            className="h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label className="text-sm font-medium">Vehicle Number <span className="text-slate-400 font-normal">(Optional)</span></Label>
+                                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Vehicle Number <span className="text-slate-400 font-normal">(Optional)</span></Label>
                                     <Input
                                         placeholder="TS09AB1234"
                                         value={newTrip.vehicle_number}
                                         onChange={(e) => setNewTrip({ ...newTrip, vehicle_number: e.target.value })}
-                                        className="h-10"
+                                        className="h-11 rounded-lg border-slate-200 dark:border-slate-700 focus:border-[var(--accent)] focus:ring-[var(--accent)]"
                                     />
                                 </div>
                             </div>
 
                             <DialogFooter className="gap-2 sm:gap-0">
                                 <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleAddTrip} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                                <Button onClick={handleAddTrip} disabled={submitting} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-md">
                                     {submitting ? "Recording..." : "Record Trip"}
                                 </Button>
                             </DialogFooter>

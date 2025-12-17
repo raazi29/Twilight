@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         const supabase = createServerClient();
         const body = await request.json();
 
-        const { name, phone, vehicle_number, payment_preference } = body;
+        const { name, phone, vehicle_number, payment_preference, profile_image } = body;
 
         // Validation
         if (!name) {
@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
                 phone: phone || null,
                 vehicle_number: vehicle_number || null,
                 payment_preference: payment_preference || 'split',
+                profile_image: profile_image || null,
             })
             .select()
             .single();

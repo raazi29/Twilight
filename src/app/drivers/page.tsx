@@ -24,7 +24,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, User, Phone, Bus, AlertCircle, Camera, X } from "lucide-react";
+import { Plus, Pencil, Trash2, User, Phone, Bus, AlertCircle, Camera, X, IndianRupee } from "lucide-react";
 import { PAYMENT_PREFERENCES } from "@/lib/earnings-calculator";
 import { PaymentPreference } from "@/lib/supabase/types";
 import { toast } from "@/hooks/use-toast";
@@ -212,119 +212,115 @@ export default function DriversPage() {
         }
     };
 
-    // Shared form component with improved spacing
-    const DriverForm = () => (
-        <div className="grid gap-6 py-6">
-            {/* Profile Image */}
-            <div className="flex flex-col items-center gap-4">
-                <div className="relative group">
-                    <div className="h-24 w-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-600 transition-colors group-hover:border-slate-400">
+    // Form content as a variable (not a component) to prevent re-creation on state changes
+    const driverFormContent = (
+        <div className="grid gap-4">
+            {/* Compact Profile Photo */}
+            <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                    <div className="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700">
                         {formData.profile_image ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
                             <img src={formData.profile_image} alt="Profile" className="h-full w-full object-cover" />
                         ) : (
-                            <User className="h-10 w-10 text-slate-400" />
+                            <User className="h-6 w-6 text-slate-400" />
                         )}
                     </div>
-                    {formData.profile_image && (
-                        <button
-                            type="button"
-                            onClick={removeImage}
-                            className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 shadow-sm"
-                            aria-label="Remove profile image"
-                            title="Remove profile image"
-                        >
-                            <X className="h-3 w-3" />
-                        </button>
-                    )}
-                </div>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    aria-label="Upload profile image"
-                    title="Upload profile image"
-                    id="profile-image-upload"
-                />
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="text-xs gap-2"
-                    aria-controls="profile-image-upload"
-                >
-                    <Camera className="h-3.5 w-3.5" />
-                    {formData.profile_image ? "Change Photo" : "Upload Photo"}
-                </Button>
-            </div>
-
-            <div className="space-y-4">
-                <div className="grid gap-2">
-                    <Label htmlFor="driver-name" className="text-sm font-medium">Driver Name <span className="text-red-500">*</span></Label>
-                    <Input
-                        id="driver-name"
-                        placeholder="Enter full name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="h-10"
+                    <input
+                        ref={fileInputRef}
+                        title="Upload driver profile photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
                     />
                 </div>
+                <div className="flex-1">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-8 text-xs"
+                    >
+                        <Camera className="h-3 w-3 mr-1" />
+                        {formData.profile_image ? "Change" : "Add Photo"}
+                    </Button>
+                    {formData.profile_image && (
+                        <Button variant="ghost" size="sm" onClick={removeImage} className="h-8 text-xs text-red-500 hover:text-red-600 ml-1">
+                            Remove
+                        </Button>
+                    )}
+                </div>
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="driver-phone" className="text-sm font-medium">Phone Number</Label>
+            <div className="grid gap-2">
+                <Label htmlFor="driver-name" className="text-sm font-medium text-slate-700 dark:text-slate-300">Driver Name <span className="text-red-500">*</span></Label>
+                <Input
+                    id="driver-name"
+                    placeholder="e.g. Rajesh Kumar"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="h-10"
+                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                    <Label htmlFor="driver-phone" className="text-sm font-medium text-slate-700 dark:text-slate-300">Phone Number</Label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-2.5 text-slate-500 dark:text-slate-400 text-sm font-medium">+91</span>
                         <Input
                             id="driver-phone"
-                            placeholder="+91 XXXXX XXXXX"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="h-10"
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="driver-vehicle" className="text-sm font-medium">Vehicle Number</Label>
-                        <Input
-                            id="driver-vehicle"
-                            placeholder="TS09AB1234"
-                            value={formData.vehicle_number}
-                            onChange={(e) => setFormData({ ...formData, vehicle_number: e.target.value })}
-                            className="h-10"
+                            placeholder="98765 43210"
+                            value={formData.phone?.replace(/^\+?91\s?/, '') || ''}
+                            onChange={(e) => {
+                                const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                setFormData({ ...formData, phone: digits ? `+91 ${digits}` : '' });
+                            }}
+                            className="pl-12 h-10"
                         />
                     </div>
                 </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="driver-vehicle" className="text-sm font-medium text-slate-700 dark:text-slate-300">Vehicle Number</Label>
+                    <Input
+                        id="driver-vehicle"
+                        placeholder="TS 09 AB 1234"
+                        value={formData.vehicle_number}
+                        onChange={(e) => setFormData({ ...formData, vehicle_number: e.target.value.toUpperCase() })}
+                        className="h-10 uppercase"
+                    />
+                </div>
+            </div>
 
-                <div className="grid gap-3">
-                    <Label className="text-sm font-medium">Payment Preference</Label>
-                    <div className="grid gap-3">
-                        {PAYMENT_PREFERENCES.map((pref) => (
-                            <label
-                                key={pref.value}
-                                className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition-all ${formData.payment_preference === pref.value
-                                    ? "border-[var(--accent)] bg-[var(--accent)]/5 dark:bg-[var(--accent)]/10 ring-1 ring-[var(--accent)]"
-                                    : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
-                                    }`}
-                            >
-                                <div className="pt-0.5">
-                                    <input
-                                        type="radio"
-                                        name="payment_preference"
-                                        value={pref.value}
-                                        checked={formData.payment_preference === pref.value}
-                                        onChange={(e) => setFormData({ ...formData, payment_preference: e.target.value as PaymentPreference })}
-                                        className="h-4 w-4 accent-[var(--accent)]"
-                                    />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{pref.label}</p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{pref.description}</p>
-                                </div>
-                            </label>
-                        ))}
-                    </div>
+            <div className="grid gap-2">
+                <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Payment Preference</Label>
+                <div className="grid grid-cols-3 gap-2">
+                    {PAYMENT_PREFERENCES.map((pref) => (
+                        <div
+                            key={pref.value}
+                            onClick={() => setFormData({ ...formData, payment_preference: pref.value as PaymentPreference })}
+                            className={`flex flex-col items-center justify-center gap-1 p-3 rounded-lg border-2 cursor-pointer transition-all ${formData.payment_preference === pref.value
+                                ? "border-emerald-500 bg-emerald-500"
+                                : "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-emerald-400"
+                                }`}
+                        >
+                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${formData.payment_preference === pref.value
+                                ? "bg-white text-emerald-600"
+                                : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                                }`}>
+                                <IndianRupee className="h-4 w-4" />
+                            </div>
+                            <p className={`text-xs font-semibold ${formData.payment_preference === pref.value
+                                ? "text-white"
+                                : "text-slate-600 dark:text-slate-300"}`}>{pref.label}</p>
+                        </div>
+                    ))}
                 </div>
+                <p className="text-xs text-slate-500">
+                    {PAYMENT_PREFERENCES.find(p => p.value === formData.payment_preference)?.description}
+                </p>
             </div>
         </div>
     );
@@ -336,7 +332,7 @@ export default function DriversPage() {
             <div className="p-6 space-y-6 animate-fade-in pb-24 md:pb-6">
                 {/* Actions */}
                 <div className="flex justify-end">
-                    <Button onClick={() => { setFormData(emptyDriver); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                    <Button onClick={() => { setFormData(emptyDriver); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm bg-emerald-600 hover:bg-emerald-700 text-white">
                         <Plus className="h-4 w-4" />
                         Add Driver
                     </Button>
@@ -460,15 +456,15 @@ export default function DriversPage() {
 
             {/* Add Dialog */}
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Add New Driver</DialogTitle>
                         <DialogDescription>Register a new driver with their details and payment preference.</DialogDescription>
                     </DialogHeader>
-                    <DriverForm />
+                    {driverFormContent}
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleAddDriver} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                        <Button onClick={handleAddDriver} disabled={submitting} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-md">
                             {submitting ? "Adding..." : "Add Driver"}
                         </Button>
                     </DialogFooter>
@@ -477,15 +473,15 @@ export default function DriversPage() {
 
             {/* Edit Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit Driver</DialogTitle>
                         <DialogDescription>Update driver details and payment preference.</DialogDescription>
                     </DialogHeader>
-                    <DriverForm />
+                    {driverFormContent}
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleEditDriver} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
+                        <Button onClick={handleEditDriver} disabled={submitting} className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-md">
                             {submitting ? "Saving..." : "Save Changes"}
                         </Button>
                     </DialogFooter>
