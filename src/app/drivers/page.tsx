@@ -36,6 +36,7 @@ interface Driver {
     vehicle_number: string | null;
     payment_preference: PaymentPreference;
     profile_image?: string | null;
+    created_at?: string;
 }
 
 const emptyDriver = {

@@ -35,6 +35,7 @@ interface Route {
     destination: string;
     batta_per_trip: number;
     salary_per_trip: number;
+    created_at?: string;
 }
 
 const emptyRoute = {
