@@ -79,20 +79,36 @@ export default function RoutesPage() {
         fetchRoutes();
     }, [fetchRoutes]);
 
-    // Add route
+    // Add route with optimistic update
     const handleAddRoute = async () => {
         if (!formData.origin.trim() || !formData.destination.trim()) {
             toast({ variant: "error", title: "Validation", description: "Origin and destination are required" });
             return;
         }
 
-        setSubmitting(true);
+        const routeName = formData.name || `${formData.origin} → ${formData.destination}`;
+        const tempId = `temp-${Date.now()}`;
+        const optimisticRoute: Route = {
+            id: tempId,
+            name: routeName,
+            origin: formData.origin,
+            destination: formData.destination,
+            batta_per_trip: Number(formData.batta_per_trip) || 0,
+            salary_per_trip: Number(formData.salary_per_trip) || 0,
+            created_at: new Date().toISOString(),
+        };
+
+        setRoutes(prev => [optimisticRoute, ...prev]);
+        setIsAddDialogOpen(false);
+        setFormData(emptyRoute);
+        toast({ variant: "success", title: "Success", description: "Route added successfully" });
+
         try {
             const res = await fetch("/api/routes", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    name: formData.name || `${formData.origin} → ${formData.destination}`,
+                    name: routeName,
                     origin: formData.origin,
                     destination: formData.destination,
                     batta_per_trip: Number(formData.batta_per_trip) || 0,
@@ -106,14 +122,10 @@ export default function RoutesPage() {
             }
 
             const { data } = await res.json();
-            setRoutes([...routes, data]);
-            setIsAddDialogOpen(false);
-            setFormData(emptyRoute);
-            toast({ variant: "success", title: "Success", description: "Route added successfully" });
+            setRoutes(prev => prev.map(r => r.id === tempId ? data : r));
         } catch (err: any) {
+            setRoutes(prev => prev.filter(r => r.id !== tempId));
             toast({ variant: "error", title: "Error", description: err.message });
-        } finally {
-            setSubmitting(false);
         }
     };
 

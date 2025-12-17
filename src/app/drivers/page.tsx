@@ -82,15 +82,43 @@ export default function DriversPage() {
         fetchDrivers();
     }, [fetchDrivers]);
 
-    // Handle image upload
+    // Handle image upload with compression
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setFormData({ ...formData, profile_image: reader.result as string });
+            // Compress image before storing
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = () => {
+                // Max dimensions 150x150 for avatar
+                const maxSize = 150;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                // Compress to JPEG at 70% quality
+                const compressed = canvas.toDataURL('image/jpeg', 0.7);
+                setFormData({ ...formData, profile_image: compressed });
             };
-            reader.readAsDataURL(file);
+
+            img.src = URL.createObjectURL(file);
         }
     };
 
@@ -99,14 +127,30 @@ export default function DriversPage() {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // Add driver
+    // Add driver with optimistic update
     const handleAddDriver = async () => {
         if (!formData.name.trim()) {
             toast({ variant: "error", title: "Validation", description: "Driver name is required" });
             return;
         }
 
-        setSubmitting(true);
+        // Optimistic update - close dialog and show immediately
+        const tempId = `temp-${Date.now()}`;
+        const optimisticDriver: Driver = {
+            id: tempId,
+            name: formData.name,
+            phone: formData.phone || null,
+            vehicle_number: formData.vehicle_number || null,
+            payment_preference: formData.payment_preference,
+            profile_image: formData.profile_image || null,
+            created_at: new Date().toISOString(),
+        };
+
+        setDrivers(prev => [optimisticDriver, ...prev]);
+        setIsAddDialogOpen(false);
+        setFormData(emptyDriver);
+        toast({ variant: "success", title: "Success", description: "Driver added successfully" });
+
         try {
             const res = await fetch("/api/drivers", {
                 method: "POST",
@@ -120,14 +164,12 @@ export default function DriversPage() {
             }
 
             const { data } = await res.json();
-            setDrivers([...drivers, data]);
-            setIsAddDialogOpen(false);
-            setFormData(emptyDriver);
-            toast({ variant: "success", title: "Success", description: "Driver added successfully" });
+            // Replace temp driver with real one
+            setDrivers(prev => prev.map(d => d.id === tempId ? data : d));
         } catch (err: any) {
+            // Rollback on error
+            setDrivers(prev => prev.filter(d => d.id !== tempId));
             toast({ variant: "error", title: "Error", description: err.message });
-        } finally {
-            setSubmitting(false);
         }
     };
 
