@@ -343,7 +343,7 @@ function SettlementsContent() {
 
                     <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                         <DialogTrigger asChild>
-                            <Button className="w-full sm:w-auto gap-1.5 bg-gradient-to-r from-twilight-green-500 to-twilight-green-600 hover:from-twilight-green-600 hover:to-twilight-green-700 shadow-md shadow-twilight-green-500/20 text-white">
+                            <Button className="w-full sm:w-auto gap-1.5 bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 shadow-md shadow-lime-500/20 text-white">
                                 <Plus className="h-4 w-4" />
                                 New Settlement
                             </Button>

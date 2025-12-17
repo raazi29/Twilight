@@ -336,7 +336,7 @@ export default function DriversPage() {
             <div className="p-6 space-y-6 animate-fade-in pb-24 md:pb-6">
                 {/* Actions */}
                 <div className="flex justify-end">
-                    <Button onClick={() => { setFormData(emptyDriver); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm">
+                    <Button onClick={() => { setFormData(emptyDriver); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
                         <Plus className="h-4 w-4" />
                         Add Driver
                     </Button>
@@ -468,7 +468,7 @@ export default function DriversPage() {
                     <DriverForm />
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleAddDriver} disabled={submitting}>
+                        <Button onClick={handleAddDriver} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
                             {submitting ? "Adding..." : "Add Driver"}
                         </Button>
                     </DialogFooter>
@@ -485,7 +485,7 @@ export default function DriversPage() {
                     <DriverForm />
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleEditDriver} disabled={submitting}>
+                        <Button onClick={handleEditDriver} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
                             {submitting ? "Saving..." : "Save Changes"}
                         </Button>
                     </DialogFooter>

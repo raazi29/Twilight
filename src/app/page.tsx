@@ -202,7 +202,7 @@ export default function DashboardPage() {
 
                     <Dialog open={isSettleOpen} onOpenChange={setIsSettleOpen}>
                         <DialogTrigger asChild>
-                            <Button size="sm" className="gap-1.5 w-full sm:w-auto bg-gradient-to-r from-twilight-green-500 to-twilight-green-600 hover:from-twilight-green-600 hover:to-twilight-green-700 shadow-md shadow-twilight-green-500/20 text-white">
+                            <Button size="sm" className="gap-1.5 w-full sm:w-auto bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 shadow-md shadow-lime-500/20 text-white">
                                 <Banknote className="h-3.5 w-3.5" />
                                 Settle {period === "weekly" ? "Batta" : "Salary"}
                             </Button>
@@ -307,7 +307,7 @@ export default function DashboardPage() {
                                 <Button
                                     onClick={handleCreateSettlement}
                                     disabled={settleLoading}
-                                    className="h-10 px-6 bg-gradient-to-r from-twilight-green-500 to-twilight-green-600 hover:from-twilight-green-600 hover:to-twilight-green-700 text-white shadow-md"
+                                    className="h-10 px-6 bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white shadow-md"
                                 >
                                     {settleLoading ? "Creating..." : "Create Settlement"}
                                 </Button>

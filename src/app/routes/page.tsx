@@ -274,7 +274,7 @@ export default function RoutesPage() {
             <div className="p-6 space-y-6 animate-fade-in pb-24 md:pb-6">
                 {/* Actions */}
                 <div className="flex justify-end">
-                    <Button onClick={() => { setFormData(emptyRoute); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm">
+                    <Button onClick={() => { setFormData(emptyRoute); setIsAddDialogOpen(true); }} className="gap-2 shadow-sm bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
                         <Plus className="h-4 w-4" />
                         Add Route
                     </Button>
@@ -400,7 +400,7 @@ export default function RoutesPage() {
                     <RouteForm />
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleAddRoute} disabled={submitting}>
+                        <Button onClick={handleAddRoute} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
                             {submitting ? "Adding..." : "Add Route"}
                         </Button>
                     </DialogFooter>
@@ -417,7 +417,7 @@ export default function RoutesPage() {
                     <RouteForm />
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleEditRoute} disabled={submitting}>
+                        <Button onClick={handleEditRoute} disabled={submitting} className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white">
                             {submitting ? "Saving..." : "Save Changes"}
                         </Button>
                     </DialogFooter>

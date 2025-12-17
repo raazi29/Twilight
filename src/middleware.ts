@@ -2,6 +2,18 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+    const { pathname } = request.nextUrl;
+
+    // Skip middleware for API routes, static files, and public assets
+    if (
+        pathname.startsWith("/api/") ||
+        pathname.startsWith("/_next/") ||
+        pathname.startsWith("/favicon.ico") ||
+        pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|ico)$/)
+    ) {
+        return NextResponse.next();
+    }
+
     let response = NextResponse.next({
         request: {
             headers: request.headers,
@@ -56,13 +68,17 @@ export async function middleware(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    // If user is not signed in and the current path is NOT /login, redirect the user to /login
-    if (!user && !request.nextUrl.pathname.startsWith("/login")) {
+    // Public routes that don't require authentication
+    const publicRoutes = ["/login", "/privacy", "/terms"];
+    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+
+    // If user is not signed in and trying to access protected route, redirect to login
+    if (!user && !isPublicRoute) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // If user IS signed in and attempts to go to /login, redirect to /
-    if (user && request.nextUrl.pathname.startsWith("/login")) {
+    // If user IS signed in and attempts to go to /login, redirect to dashboard
+    if (user && pathname.startsWith("/login")) {
         return NextResponse.redirect(new URL("/", request.url));
     }
 
@@ -73,12 +89,13 @@ export const config = {
     matcher: [
         /*
          * Match all request paths except for the ones starting with:
+         * - api (API routes)
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
-         * - api/ (API routes - generally we might want to protect these too, but let's keep it simple for generic auth first, or protect them if needed. Actually, protecting API routes is good practice.)
-         * Feel free to modify this pattern to include more paths.
+         * - public assets (images, etc.)
          */
-        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
     ],
 };
+
