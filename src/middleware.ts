@@ -1,19 +1,84 @@
-import { authMiddleware } from "@clerk/nextjs";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export default authMiddleware({
-    // Routes that can be accessed while signed out
-    publicRoutes: [
-        "/sign-in(.*)",
-        "/sign-up(.*)",
-        "/sso-callback(.*)",
-        "/api/(.*)",  // Allow API routes publicly (auth handled at page level)
-    ],
-    // Routes that don't require authentication
-    ignoredRoutes: [
-        "/api/(.*)",
-    ],
-});
+export async function middleware(request: NextRequest) {
+    let response = NextResponse.next({
+        request: {
+            headers: request.headers,
+        },
+    });
+
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return request.cookies.get(name)?.value;
+                },
+                set(name: string, value: string, options: CookieOptions) {
+                    request.cookies.set({
+                        name,
+                        value,
+                        ...options,
+                    });
+                    response = NextResponse.next({
+                        request: {
+                            headers: request.headers,
+                        },
+                    });
+                    response.cookies.set({
+                        name,
+                        value,
+                        ...options,
+                    });
+                },
+                remove(name: string, options: CookieOptions) {
+                    request.cookies.set({
+                        name,
+                        value: "",
+                        ...options,
+                    });
+                    response = NextResponse.next({
+                        request: {
+                            headers: request.headers,
+                        },
+                    });
+                    response.cookies.set({
+                        name,
+                        value: "",
+                        ...options,
+                    });
+                },
+            },
+        }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // If user is not signed in and the current path is NOT /login, redirect the user to /login
+    if (!user && !request.nextUrl.pathname.startsWith("/login")) {
+        return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    // If user IS signed in and attempts to go to /login, redirect to /
+    if (user && request.nextUrl.pathname.startsWith("/login")) {
+        return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    return response;
+}
 
 export const config = {
-    matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - api/ (API routes - generally we might want to protect these too, but let's keep it simple for generic auth first, or protect them if needed. Actually, protecting API routes is good practice.)
+         * Feel free to modify this pattern to include more paths.
+         */
+        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    ],
 };

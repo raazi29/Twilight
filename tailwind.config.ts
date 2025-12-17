@@ -22,11 +22,16 @@ export default {
                         100: "#dbeafe",
                         50: "#eff6ff",
                     },
+                    // Updated to match the bright lime-green from SmartBus branding
                     green: {
+                        700: "#4d7c0f",
                         600: "#65a30d",
-                        500: "#84cc16",
-                        400: "#a3e635",
+                        500: "#84cc16",  // Main brand color - lime green
+                        400: "#a3e635",  // Bright lime (matches bus accent)
+                        300: "#bef264",
+                        200: "#d9f99d",
                         100: "#ecfccb",
+                        50: "#f7fee7",
                     },
                 },
             },

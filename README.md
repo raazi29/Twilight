@@ -1,4 +1,4 @@
-# Driver Payments Module
+# Twilight - Driver Payments Module
 
 A production-ready admin dashboard for managing driver earnings, settlements, and payment preferences. Built for operations teams to track Batta (weekly) and Salary (monthly) components.
 
@@ -8,23 +8,21 @@ A production-ready admin dashboard for managing driver earnings, settlements, an
 
 ## Features
 
-- **🚗 Route Configuration** - Define routes with per-trip Batta and Salary values
-- **👤 Driver Management** - Register drivers with customizable payment preferences
-- **📊 Trip Tracking** - Record trips with automatic earnings calculation
-- **💰 Earnings Dashboard** - Weekly/Monthly view with summary cards
-- **✅ Settlement System** - Process payments with detailed breakdowns
-- **📜 Settlement History** - Expandable rows showing trip-level details
+- 🚗 **Route Configuration** - Define routes with per-trip Batta and Salary values
+- 👤 **Driver Management** - Register drivers with customizable payment preferences
+- 📊 **Trip Tracking** - Record trips with automatic earnings calculation
+- 💰 **Earnings Dashboard** - Weekly/Monthly view with summary cards
+- ✅ **Settlement System** - Process payments with detailed breakdowns
+- 📜 **Settlement History** - Expandable rows showing trip-level details
 
 ## Tech Stack
 
 | Technology | Purpose |
 |------------|---------|
 | [Next.js 14](https://nextjs.org/) | React framework with App Router |
-| [Clerk](https://clerk.com/) | Authentication & user management |
-| [Supabase](https://supabase.com/) | PostgreSQL database |
+| [Supabase](https://supabase.com/) | PostgreSQL database & Auth |
 | [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
 | [Radix UI](https://radix-ui.com/) | Accessible UI primitives |
-| [Vercel](https://vercel.com/) | Deployment platform |
 
 ## Quick Start
 
@@ -41,18 +39,9 @@ npm install
 Create `.env.local` in the project root:
 
 ```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
-
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
-SUPABASE_SERVICE_ROLE_KEY=xxx  # Optional: for server-side operations
 ```
 
 ### 3. Set Up Database
@@ -61,7 +50,13 @@ SUPABASE_SERVICE_ROLE_KEY=xxx  # Optional: for server-side operations
 2. Open **SQL Editor**
 3. Copy and run the SQL from `supabase/schema.sql`
 
-### 4. Run Development Server
+### 4. Create Admin User
+
+1. Go to Supabase Dashboard → Authentication → Users
+2. Click "Add User" and create an admin account
+3. Use these credentials to login at `/login`
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
@@ -84,7 +79,7 @@ src/
 │   ├── routes/             # Route configuration page
 │   ├── trips/              # Trip tracking page
 │   ├── settlements/        # Settlement history page
-│   ├── sign-in/            # Clerk auth
+│   ├── login/              # Admin login
 │   └── page.tsx            # Dashboard
 ├── components/
 │   ├── ui/                 # Reusable UI components
@@ -93,6 +88,7 @@ src/
 ├── hooks/                  # Custom React hooks
 └── lib/
     ├── supabase/           # Database client
+    ├── auth-actions.ts     # Login/logout actions
     ├── utils.ts            # Helper functions
     └── earnings-calculator.ts  # Business logic
 ```
@@ -137,27 +133,6 @@ src/
 | PUT | `/api/settlements/[id]` | Update status |
 | DELETE | `/api/settlements/[id]` | Delete (pending only) |
 
-## Deployment
-
-### Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=your-repo-url)
-
-1. Push code to GitHub
-2. Import to Vercel
-3. Add environment variables
-4. Deploy
-
-### Environment Variables for Production
-
-Set these in Vercel Dashboard > Settings > Environment Variables:
-
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-- `CLERK_SECRET_KEY`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (optional)
-
 ## Earnings Logic
 
 ```
@@ -174,4 +149,3 @@ Set these in Vercel Dashboard > Settings > Environment Variables:
 ## License
 
 MIT License - feel free to use for your projects.
-# Twilight

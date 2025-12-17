@@ -102,24 +102,42 @@ export async function POST(request: NextRequest) {
         }
 
         // Calculate settlement amount from unsettled trips
+        console.log(`Fetching trips for Driver: ${driver_id}, Range: ${period_start} to ${period_end}`);
+
         const { data: trips, error: tripsError } = await supabase
             .from('trips')
-            .select('batta_earned, salary_earned')
+            .select('batta_earned, salary_earned, trip_date, route_id')
             .eq('driver_id', driver_id)
             .gte('trip_date', period_start)
             .lte('trip_date', period_end);
 
         if (tripsError) {
+            console.error("Error fetching trips for settlement:", tripsError);
             return NextResponse.json({ error: tripsError.message }, { status: 500 });
         }
 
+        console.log("Found trips:", trips);
+
         const amount = (trips || []).reduce((sum, trip) => {
-            return sum + Number(settlement_type === 'batta' ? trip.batta_earned : trip.salary_earned);
+            const val = Number(settlement_type === 'batta' ? trip.batta_earned : trip.salary_earned);
+            console.log(`Trip Date: ${trip.trip_date}, Type: ${settlement_type}, Value: ${val}`);
+            return sum + val;
         }, 0);
 
+        console.log("Total calculated amount:", amount);
+
         if (amount === 0) {
+            const tripCount = (trips || []).length;
+            let detail = "";
+
+            if (tripCount === 0) {
+                detail = "No trips found in this date range.";
+            } else {
+                detail = `Found ${tripCount} trips, but their calculated ${settlement_type} value is 0. Check if the driver's payment preference supports ${settlement_type}.`;
+            }
+
             return NextResponse.json(
-                { error: 'No earnings to settle for this period' },
+                { error: `Cannot create settlement: ${detail}` },
                 { status: 400 }
             );
         }

@@ -1,16 +1,16 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
 
-export interface InputProps
-    extends React.InputHTMLAttributes<HTMLInputElement> { }
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, ...props }, ref) => {
+export interface TextareaProps
+    extends React.TextareaHTMLAttributes<HTMLTextAreaElement> { }
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+    ({ className, ...props }, ref) => {
         return (
-            <input
-                type={type}
+            <textarea
                 className={cn(
-                    "flex h-10 w-full rounded-lg border px-3 py-2 text-[13px] transition-all duration-150",
+                    "flex min-h-[80px] w-full rounded-lg border px-3 py-2 text-[13px] transition-all duration-150",
                     "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100",
                     "border-slate-300 dark:border-slate-600",
                     "placeholder:text-slate-400 dark:placeholder:text-slate-500",
@@ -21,9 +21,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 ref={ref}
                 {...props}
             />
-        );
+        )
     }
-);
-Input.displayName = "Input";
+)
+Textarea.displayName = "Textarea"
 
-export { Input };
+export { Textarea }

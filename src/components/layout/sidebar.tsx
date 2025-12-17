@@ -14,6 +14,7 @@ import {
     Moon,
     Sun,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -26,6 +27,18 @@ const navItems = [
 export function Sidebar() {
     const pathname = usePathname();
     const { theme, setTheme, resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Prevent hydration mismatch by rendering a placeholder or default state until mounted
+    // However, for the sidebar structure to remain consistent (avoid layout shift), 
+    // we only gate the theme toggle text/icon if needed, or just accept the flicker.
+    // Better: Render the button but ensure the ICON matches server or empty until mounted.
+    // Actually, simple way: return null until mounted? No, that causes layout shift.
+    // We will standardly render the sidebar, but for the Theme Button, we check mounted.
 
     return (
         <aside className="fixed left-0 top-0 z-40 h-screen w-[220px] border-r bg-[var(--sidebar-bg)] text-[var(--sidebar-text)]">
@@ -80,12 +93,21 @@ export function Sidebar() {
                     onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                     className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium text-[var(--sidebar-text-muted)] transition-colors hover:bg-white/5 hover:text-white"
                 >
-                    {resolvedTheme === "dark" ? (
-                        <Sun className="h-4 w-4" />
+                    {mounted ? (
+                        <>
+                            {resolvedTheme === "dark" ? (
+                                <Sun className="h-4 w-4" />
+                            ) : (
+                                <Moon className="h-4 w-4" />
+                            )}
+                            {resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}
+                        </>
                     ) : (
-                        <Moon className="h-4 w-4" />
+                        <>
+                            <Sun className="h-4 w-4 opacity-0" />
+                            <span className="opacity-0">Toggle Theme</span>
+                        </>
                     )}
-                    {resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}
                 </button>
 
                 <Link

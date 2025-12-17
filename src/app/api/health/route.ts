@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
         version: process.env.npm_package_version || '0.1.0',
         environment: process.env.NODE_ENV,
         checks: {
-            clerk: !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
             supabase: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
         },
     };

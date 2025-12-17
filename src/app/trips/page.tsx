@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DashboardShell, Header } from "@/components/layout";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
     Table,
     TableBody,
@@ -32,32 +33,40 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Calendar, Filter } from "lucide-react";
+import { Plus, Calendar, Filter, AlertCircle, Truck, MapPin, User, IndianRupee } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
-const DEMO_DRIVERS = [
-    { id: "1", name: "Rajesh Kumar" },
-    { id: "2", name: "Suresh Reddy" },
-    { id: "3", name: "Venkat Rao" },
-    { id: "4", name: "Krishna Murthy" },
-];
+interface Driver {
+    id: string;
+    name: string;
+    vehicle_number?: string;
+}
 
-const DEMO_ROUTES = [
-    { id: "1", name: "Hyderabad → Tirupati" },
-    { id: "2", name: "Chennai → Bangalore" },
-    { id: "3", name: "Hyderabad → Mumbai" },
-    { id: "4", name: "Vizag → Hyderabad" },
-];
+interface Route {
+    id: string;
+    name: string;
+}
 
-const DEMO_TRIPS = [
-    { id: "1", driver_id: "1", driver_name: "Rajesh Kumar", route_id: "1", route_name: "Hyderabad → Tirupati", vehicle_number: "TS09AB1234", trip_date: "2024-12-15", trip_count: 2, batta_earned: 1000, salary_earned: 600 },
-    { id: "2", driver_id: "2", driver_name: "Suresh Reddy", route_id: "2", route_name: "Chennai → Bangalore", vehicle_number: "TN01CD5678", trip_date: "2024-12-14", trip_count: 1, batta_earned: 1300, salary_earned: 0 },
-    { id: "3", driver_id: "3", driver_name: "Venkat Rao", route_id: "3", route_name: "Hyderabad → Mumbai", vehicle_number: "TS10EF9012", trip_date: "2024-12-14", trip_count: 1, batta_earned: 0, salary_earned: 2500 },
-    { id: "4", driver_id: "1", driver_name: "Rajesh Kumar", route_id: "4", route_name: "Vizag → Hyderabad", vehicle_number: "TS09AB1234", trip_date: "2024-12-13", trip_count: 1, batta_earned: 600, salary_earned: 400 },
-    { id: "5", driver_id: "4", driver_name: "Krishna Murthy", route_id: "1", route_name: "Hyderabad → Tirupati", vehicle_number: "AP05GH3456", trip_date: "2024-12-13", trip_count: 3, batta_earned: 1500, salary_earned: 900 },
-];
+interface Trip {
+    id: string;
+    driver_id: string;
+    driver: Driver | null;
+    route_id: string;
+    route: Route | null;
+    vehicle_number: string | null;
+    trip_date: string;
+    trip_count: number;
+    batta_earned: number;
+    salary_earned: number;
+}
 
 export default function TripsPage() {
-    const [trips, setTrips] = useState(DEMO_TRIPS);
+    const [trips, setTrips] = useState<Trip[]>([]);
+    const [drivers, setDrivers] = useState<Driver[]>([]);
+    const [routes, setRoutes] = useState<Route[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [filterDriver, setFilterDriver] = useState<string>("all");
     const [newTrip, setNewTrip] = useState({
@@ -68,47 +77,108 @@ export default function TripsPage() {
         trip_count: "1",
     });
 
-    const handleAddTrip = () => {
-        const driver = DEMO_DRIVERS.find((d) => d.id === newTrip.driver_id);
-        const route = DEMO_ROUTES.find((r) => r.id === newTrip.route_id);
-        const batta = 500 * Number(newTrip.trip_count);
-        const salary = 300 * Number(newTrip.trip_count);
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const [tripsRes, driversRes, routesRes] = await Promise.all([
+                fetch("/api/trips"),
+                fetch("/api/drivers"),
+                fetch("/api/routes"),
+            ]);
 
-        const trip = {
-            id: String(trips.length + 1),
-            driver_id: newTrip.driver_id,
-            driver_name: driver?.name || "",
-            route_id: newTrip.route_id,
-            route_name: route?.name || "",
-            vehicle_number: newTrip.vehicle_number,
-            trip_date: newTrip.trip_date,
-            trip_count: Number(newTrip.trip_count),
-            batta_earned: batta,
-            salary_earned: salary,
-        };
-        setTrips([trip, ...trips]);
-        setIsAddDialogOpen(false);
-        setNewTrip({ driver_id: "", route_id: "", vehicle_number: "", trip_date: new Date().toISOString().split("T")[0], trip_count: "1" });
+            if (!tripsRes.ok || !driversRes.ok || !routesRes.ok) {
+                throw new Error("Failed to fetch data");
+            }
+
+            const [tripsData, driversData, routesData] = await Promise.all([
+                tripsRes.json(),
+                driversRes.json(),
+                routesRes.json(),
+            ]);
+
+            setTrips(tripsData.data || []);
+            setDrivers(driversData.data || []);
+            setRoutes(routesData.data || []);
+        } catch (err) {
+            console.error("Error fetching data:", err);
+            setError("Failed to load data");
+            toast({ variant: "error", title: "Error", description: "Failed to load trips" });
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const handleAddTrip = async () => {
+        if (!newTrip.driver_id || !newTrip.route_id) {
+            toast({ variant: "error", title: "Validation", description: "Driver and route are required" });
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const res = await fetch("/api/trips", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    driver_id: newTrip.driver_id,
+                    route_id: newTrip.route_id,
+                    vehicle_number: newTrip.vehicle_number || null,
+                    trip_date: newTrip.trip_date,
+                    trip_count: Number(newTrip.trip_count) || 1,
+                }),
+            });
+
+            if (!res.ok) {
+                const { error } = await res.json();
+                throw new Error(error || "Failed to add trip");
+            }
+
+            // Refresh all data to get updated calculations
+            await fetchData();
+            setIsAddDialogOpen(false);
+            setNewTrip({
+                driver_id: "",
+                route_id: "",
+                vehicle_number: "",
+                trip_date: new Date().toISOString().split("T")[0],
+                trip_count: "1",
+            });
+            toast({ variant: "success", title: "Success", description: "Trip recorded successfully" });
+        } catch (err: any) {
+            toast({ variant: "error", title: "Error", description: err.message });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const filteredTrips = filterDriver === "all" ? trips : trips.filter((t) => t.driver_id === filterDriver);
+    const filteredTrips = filterDriver === "all"
+        ? trips
+        : trips.filter((t) => t.driver_id === filterDriver);
+
+    const getDriverName = (trip: Trip) => trip.driver?.name || `Driver #${trip.driver_id}`;
+    const getRouteName = (trip: Trip) => trip.route?.name || `Route #${trip.route_id}`;
 
     return (
         <DashboardShell>
-            <Header title="Trips" subtitle={`${filteredTrips.length} trips`} />
+            <Header title="Trips" subtitle={loading ? "Loading..." : `${filteredTrips.length} trips recorded`} />
 
-            <div className="p-6 space-y-4 animate-fade-in">
+            <div className="p-6 space-y-6 animate-fade-in pb-24 md:pb-6">
                 {/* Filters & Actions */}
-                <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <Filter className="h-4 w-4" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <Filter className="h-4 w-4 text-slate-400" />
                         <Select value={filterDriver} onValueChange={setFilterDriver}>
-                            <SelectTrigger className="w-[180px] h-8 text-[13px]">
+                            <SelectTrigger className="w-full sm:w-[200px] h-9 text-sm">
                                 <SelectValue placeholder="All Drivers" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Drivers</SelectItem>
-                                {DEMO_DRIVERS.map((d) => (
+                                {drivers.map((d) => (
                                     <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -117,120 +187,193 @@ export default function TripsPage() {
 
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button size="sm" className="gap-1.5">
-                                <Plus className="h-3.5 w-3.5" />
-                                Add Trip
+                            <Button className="w-full sm:w-auto gap-2 shadow-sm">
+                                <Plus className="h-4 w-4" />
+                                Record Trip
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="sm:max-w-[500px]">
                             <DialogHeader>
-                                <DialogTitle>Record Trip</DialogTitle>
-                                <DialogDescription>Add completed trip for earnings</DialogDescription>
+                                <DialogTitle>Record New Trip</DialogTitle>
+                                <DialogDescription>Enter trip details to calculate earnings automatically.</DialogDescription>
                             </DialogHeader>
 
-                            <div className="grid gap-4 p-5 pt-0">
+                            <div className="grid gap-6 py-4">
                                 <div className="grid gap-2">
-                                    <Label className="text-[12px]">Driver</Label>
+                                    <Label className="text-sm font-medium">Select Driver <span className="text-red-500">*</span></Label>
                                     <Select value={newTrip.driver_id} onValueChange={(v) => setNewTrip({ ...newTrip, driver_id: v })}>
-                                        <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
+                                        <SelectTrigger className="h-10">
+                                            <SelectValue placeholder="Search or select driver..." />
+                                        </SelectTrigger>
                                         <SelectContent>
-                                            {DEMO_DRIVERS.map((d) => (
+                                            {drivers.map((d) => (
                                                 <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
+
                                 <div className="grid gap-2">
-                                    <Label className="text-[12px]">Route</Label>
+                                    <Label className="text-sm font-medium">Select Route <span className="text-red-500">*</span></Label>
                                     <Select value={newTrip.route_id} onValueChange={(v) => setNewTrip({ ...newTrip, route_id: v })}>
-                                        <SelectTrigger><SelectValue placeholder="Select route" /></SelectTrigger>
+                                        <SelectTrigger className="h-10">
+                                            <SelectValue placeholder="Select route..." />
+                                        </SelectTrigger>
                                         <SelectContent>
-                                            {DEMO_ROUTES.map((r) => (
+                                            {routes.map((r) => (
                                                 <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="grid gap-2">
-                                        <Label className="text-[12px]">Vehicle</Label>
-                                        <Input placeholder="TS09AB1234" value={newTrip.vehicle_number} onChange={(e) => setNewTrip({ ...newTrip, vehicle_number: e.target.value })} />
+                                        <Label className="text-sm font-medium">Trip Date</Label>
+                                        <Input
+                                            type="date"
+                                            value={newTrip.trip_date}
+                                            onChange={(e) => setNewTrip({ ...newTrip, trip_date: e.target.value })}
+                                            className="h-10"
+                                        />
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label className="text-[12px]">Trips</Label>
-                                        <Input type="number" min="1" value={newTrip.trip_count} onChange={(e) => setNewTrip({ ...newTrip, trip_count: e.target.value })} />
+                                        <Label className="text-sm font-medium">Number of Trips</Label>
+                                        <Input
+                                            type="number"
+                                            min="1"
+                                            value={newTrip.trip_count}
+                                            onChange={(e) => setNewTrip({ ...newTrip, trip_count: e.target.value })}
+                                            className="h-10"
+                                        />
                                     </div>
                                 </div>
+
                                 <div className="grid gap-2">
-                                    <Label className="text-[12px]">Date</Label>
-                                    <Input type="date" value={newTrip.trip_date} onChange={(e) => setNewTrip({ ...newTrip, trip_date: e.target.value })} />
+                                    <Label className="text-sm font-medium">Vehicle Number <span className="text-slate-400 font-normal">(Optional)</span></Label>
+                                    <Input
+                                        placeholder="TS09AB1234"
+                                        value={newTrip.vehicle_number}
+                                        onChange={(e) => setNewTrip({ ...newTrip, vehicle_number: e.target.value })}
+                                        className="h-10"
+                                    />
                                 </div>
                             </div>
 
-                            <DialogFooter>
-                                <Button variant="ghost" size="sm" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                                <Button size="sm" onClick={handleAddTrip}>Add Trip</Button>
+                            <DialogFooter className="gap-2 sm:gap-0">
+                                <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                                <Button onClick={handleAddTrip} disabled={submitting}>
+                                    {submitting ? "Recording..." : "Record Trip"}
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
                 </div>
 
-                {/* Trips Table */}
-                <Card>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Driver</TableHead>
-                                <TableHead>Route</TableHead>
-                                <TableHead>Vehicle</TableHead>
-                                <TableHead className="text-center">Trips</TableHead>
-                                <TableHead className="text-right">Batta</TableHead>
-                                <TableHead className="text-right">Salary</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredTrips.map((trip) => (
-                                <TableRow key={trip.id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-1.5">
-                                            <Calendar className="h-3 w-3" />
-                                            {formatDate(trip.trip_date)}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="font-medium">{trip.driver_name}</TableCell>
-                                    <TableCell>{trip.route_name}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline" dot={false}>{trip.vehicle_number}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-[var(--background-hover)] text-[11px] font-medium">
-                                            {trip.trip_count}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {trip.batta_earned > 0 ? (
-                                            <span className="text-amber-500 tabular-nums">{formatCurrency(trip.batta_earned)}</span>
-                                        ) : (
-                                            <span className="text-[var(--foreground-muted)]">—</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {trip.salary_earned > 0 ? (
-                                            <span className="text-blue-500 tabular-nums">{formatCurrency(trip.salary_earned)}</span>
-                                        ) : (
-                                            <span className="text-[var(--foreground-muted)]">—</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-right font-medium tabular-nums">
-                                        {formatCurrency(trip.batta_earned + trip.salary_earned)}
-                                    </TableCell>
-                                </TableRow>
+                {/* Error State */}
+                {error && (
+                    <Card className="border-red-500/20 bg-red-500/5">
+                        <CardContent className="flex items-center gap-3 p-4">
+                            <AlertCircle className="h-5 w-5 text-red-400" />
+                            <p className="text-[13px] text-red-400">{error}</p>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Loading State */}
+                {loading && (
+                    <Card>
+                        <div className="p-4 space-y-3">
+                            {[1, 2, 3, 4].map((i) => (
+                                <Skeleton key={i} className="h-12 w-full" />
                             ))}
-                        </TableBody>
-                    </Table>
-                </Card>
+                        </div>
+                    </Card>
+                )}
+
+                {/* Empty State */}
+                {!loading && !error && filteredTrips.length === 0 && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center justify-center py-12">
+                            <Truck className="h-16 w-16 text-slate-100 dark:text-slate-800 mb-4" />
+                            <p className="text-base font-medium text-slate-900 dark:text-slate-200">No trips recorded</p>
+                            <p className="text-sm text-slate-500 mt-1 text-center max-w-sm">Record your first trip to start tracking daily earnings and performance.</p>
+                            <Button onClick={() => setIsAddDialogOpen(true)} variant="outline" className="mt-4 gap-2">
+                                <Plus className="h-4 w-4" /> Record Trip
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Trips Table */}
+                {!loading && !error && filteredTrips.length > 0 && (
+                    <Card className="overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <Table className="min-w-[900px]">
+                                <TableHeader>
+                                    <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+                                        <TableHead className="w-[180px]">Date</TableHead>
+                                        <TableHead>Driver</TableHead>
+                                        <TableHead>Route</TableHead>
+                                        <TableHead>Vehicle</TableHead>
+                                        <TableHead className="text-center">Trips</TableHead>
+                                        <TableHead className="text-right">Batta</TableHead>
+                                        <TableHead className="text-right">Salary</TableHead>
+                                        <TableHead className="text-right">Total Earnings</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredTrips.map((trip) => (
+                                        <TableRow key={trip.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                                            <TableCell>
+                                                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                                                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                                                    {formatDate(trip.trip_date)}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="font-medium text-slate-900 dark:text-slate-100">{getDriverName(trip)}</div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                                    <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                                                    {getRouteName(trip)}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className="font-mono text-xs font-normal">
+                                                    {trip.vehicle_number || "N/A"}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                    {trip.trip_count}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {trip.batta_earned > 0 ? (
+                                                    <span className="text-amber-600 dark:text-amber-400 font-medium tabular-nums">{formatCurrency(trip.batta_earned)}</span>
+                                                ) : (
+                                                    <span className="text-slate-300 dark:text-slate-700">—</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {trip.salary_earned > 0 ? (
+                                                    <span className="text-blue-600 dark:text-blue-400 font-medium tabular-nums">{formatCurrency(trip.salary_earned)}</span>
+                                                ) : (
+                                                    <span className="text-slate-300 dark:text-slate-700">—</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-right font-bold text-slate-900 dark:text-white tabular-nums">
+                                                {formatCurrency(trip.batta_earned + trip.salary_earned)}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </Card>
+                )}
             </div>
         </DashboardShell>
     );

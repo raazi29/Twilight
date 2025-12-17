@@ -1,4 +1,4 @@
-import { ClerkProvider } from "@clerk/nextjs";
+
 import { ThemeProvider } from "@/lib/theme-provider";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -14,14 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

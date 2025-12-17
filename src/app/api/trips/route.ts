@@ -57,10 +57,10 @@ export async function POST(request: NextRequest) {
 
         const { driver_id, route_id, vehicle_number, trip_date, trip_count } = body;
 
-        // Validation
-        if (!driver_id || !route_id || !vehicle_number || !trip_date) {
+        // Validation: vehicle_number is optional (will fallback to driver's vehicle)
+        if (!driver_id || !route_id || !trip_date) {
             return NextResponse.json(
-                { error: 'Driver, route, vehicle number, and trip date are required' },
+                { error: 'Driver, route, and trip date are required' },
                 { status: 400 }
             );
         }
@@ -86,12 +86,15 @@ export async function POST(request: NextRequest) {
             trip_count || 1
         );
 
+        // Use provided vehicle number, or fallback to driver's default, or 'Unknown'
+        const finalVehicleNumber = vehicle_number || driverResult.data.vehicle_number || 'Unknown';
+
         const { data, error } = await supabase
             .from('trips')
             .insert({
                 driver_id,
                 route_id,
-                vehicle_number,
+                vehicle_number: finalVehicleNumber,
                 trip_date,
                 trip_count: trip_count || 1,
                 batta_earned: earnings.batta,

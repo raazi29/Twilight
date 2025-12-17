@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
+import { logout } from "@/lib/auth-actions";
 
 interface HeaderProps {
     title: string;
@@ -23,14 +23,14 @@ export function Header({ title, subtitle }: HeaderProps) {
                     <span>Live</span>
                 </div>
 
-                <UserButton
-                    afterSignOutUrl="/sign-in"
-                    appearance={{
-                        elements: {
-                            avatarBox: "h-7 w-7",
-                        },
-                    }}
-                />
+                <form action={logout}>
+                    <button
+                        type="submit"
+                        className="text-[13px] font-medium text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors"
+                    >
+                        Sign Out
+                    </button>
+                </form>
             </div>
         </header>
     );
